@@ -12,3 +12,6 @@ db.properties
 .classpath
 .project
 .settings/
+
+# Ferramenta local do modo ao vivo
+vigia.sh
