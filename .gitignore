@@ -1,0 +1,14 @@
+# Build
+target/
+*.class
+
+# Configuração local do banco (contém senha)
+db.properties
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
