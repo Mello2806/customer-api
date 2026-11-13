@@ -18,6 +18,8 @@
 
     <properties>
         <java.version>17</java.version>
+        <!-- PC com pouca RAM: limita a memória da JVM que roda os testes -->
+        <argLine>-Xmx384m -XX:TieredStopAtLevel=1</argLine>
     </properties>
 
     <dependencies>
@@ -70,6 +72,10 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <!-- Mesmo motivo: limita a memória da API no mvn spring-boot:run -->
+                    <jvmArguments>-Xmx384m -XX:TieredStopAtLevel=1</jvmArguments>
+                </configuration>
             </plugin>
         </plugins>
     </build>
