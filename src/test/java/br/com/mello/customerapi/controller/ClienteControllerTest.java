@@ -17,6 +17,7 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -70,7 +71,10 @@ class ClienteControllerTest {
     void buscarInexistenteDeveDar404() throws Exception {
         when(service.buscar(99)).thenThrow(new ClienteNaoEncontradoException(99));
 
-        mockMvc.perform(get("/clientes/99")).andExpect(status().isNotFound());
+        mockMvc.perform(get("/clientes/99"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.erro").value("Cliente 99 não encontrado"));
     }
 
     @Test
@@ -88,7 +92,29 @@ class ClienteControllerTest {
         when(service.criar(any(ClienteRequest.class))).thenThrow(new DadoDuplicadoException("CPF já cadastrado"));
 
         mockMvc.perform(post("/clientes").contentType(MediaType.APPLICATION_JSON).content(JSON_ANA))
-                .andExpect(status().isConflict());
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.erro").value("CPF já cadastrado"));
+    }
+
+    @Test
+    void criarComCamposInvalidosDeveDar400ListandoOsCampos() throws Exception {
+        String invalido = """
+                {"nome": "", "email": "nao-e-email", "cpf": "111.111.111-11"}
+                """;
+
+        mockMvc.perform(post("/clientes").contentType(MediaType.APPLICATION_JSON).content(invalido))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.campos.nome").value("é obrigatório"))
+                .andExpect(jsonPath("$.campos.email").value("deve ser um e-mail válido"))
+                .andExpect(jsonPath("$.campos.cpf").value("CPF inválido"));
+        verify(service, never()).criar(any());
+    }
+
+    @Test
+    void jsonMalFormadoDeveDar400() throws Exception {
+        mockMvc.perform(post("/clientes").contentType(MediaType.APPLICATION_JSON).content("{\"nome\": "))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.erro").value("JSON inválido ou mal formatado"));
     }
 
     @Test

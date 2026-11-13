@@ -27,6 +27,12 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+        <!-- Validação com anotações (@NotBlank, @Email, @Valid...) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
         <!-- Banco de dados: JPA/Hibernate faz o "meio de campo" entre objetos Java e tabelas -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

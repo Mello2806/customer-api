@@ -3,6 +3,7 @@ package br.com.mello.customerapi.controller;
 import br.com.mello.customerapi.dto.ClienteRequest;
 import br.com.mello.customerapi.model.Cliente;
 import br.com.mello.customerapi.service.ClienteService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -45,13 +46,13 @@ public class ClienteController {
     }
 
     @PostMapping
-    public ResponseEntity<Cliente> criar(@RequestBody ClienteRequest dados) {
+    public ResponseEntity<Cliente> criar(@Valid @RequestBody ClienteRequest dados) {
         Cliente criado = service.criar(dados);
         return ResponseEntity.created(URI.create("/clientes/" + criado.getId())).body(criado);
     }
 
     @PutMapping("/{id}")
-    public Cliente atualizar(@PathVariable Integer id, @RequestBody ClienteRequest dados) {
+    public Cliente atualizar(@PathVariable Integer id, @Valid @RequestBody ClienteRequest dados) {
         return service.atualizar(id, dados);
     }
 
