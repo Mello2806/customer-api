@@ -1,0 +1,5 @@
+# Copie este arquivo para db.properties (na pasta do projeto) e coloque a senha.
+# O db.properties fica fora do git porque tem a senha.
+db.url=jdbc:postgresql://localhost:5432/clientes_db
+db.usuario=clientes_app
+db.senha=troque-esta-senha
