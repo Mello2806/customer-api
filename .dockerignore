@@ -1,0 +1,6 @@
+target/
+db.properties
+vigia.sh
+.vscode/
+.idea/
+.git/

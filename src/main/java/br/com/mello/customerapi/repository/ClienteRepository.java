@@ -1,6 +1,8 @@
 package br.com.mello.customerapi.repository;
 
 import br.com.mello.customerapi.model.Cliente;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -13,6 +15,9 @@ import java.util.List;
 public interface ClienteRepository extends JpaRepository<Cliente, Integer> {
 
     List<Cliente> findAllByOrderByNomeAsc();
+
+    /** Busca por nome: "WHERE UPPER(nome) LIKE UPPER('%texto%')", já paginada. */
+    Page<Cliente> findByNomeContainingIgnoreCase(String nome, Pageable pageable);
 
     boolean existsByEmail(String email);
 

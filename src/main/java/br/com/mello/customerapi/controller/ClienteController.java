@@ -1,6 +1,7 @@
 package br.com.mello.customerapi.controller;
 
 import br.com.mello.customerapi.dto.ClienteRequest;
+import br.com.mello.customerapi.dto.PaginaResponse;
 import br.com.mello.customerapi.model.Cliente;
 import br.com.mello.customerapi.service.ClienteService;
 import jakarta.validation.Valid;
@@ -12,14 +13,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
-import java.util.List;
 
 /**
  * CRUD de clientes. Cada método = um verbo HTTP + caminho:
- *   GET    /clientes       lista todos           → 200
+ *   GET    /clientes       lista (paginado)      → 200
+ *          ?nome=ana&pagina=0&tamanho=10   (todos opcionais)
  *   GET    /clientes/{id}  busca um              → 200 ou 404
  *   POST   /clientes       cadastra              → 201 + cabeçalho Location
  *   PUT    /clientes/{id}  atualiza              → 200 ou 404
@@ -36,8 +38,10 @@ public class ClienteController {
     }
 
     @GetMapping
-    public List<Cliente> listar() {
-        return service.listar();
+    public PaginaResponse<Cliente> listar(@RequestParam(required = false) String nome,
+                                          @RequestParam(defaultValue = "0") int pagina,
+                                          @RequestParam(defaultValue = "10") int tamanho) {
+        return PaginaResponse.de(service.listar(nome, pagina, tamanho));
     }
 
     @GetMapping("/{id}")

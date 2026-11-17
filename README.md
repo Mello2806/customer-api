@@ -42,11 +42,34 @@ Os testes usam o H2 (banco em memória), então não precisam do PostgreSQL roda
 | Método | Caminho | Descrição |
 |---|---|---|
 | GET | `/ola` | Confere se a API está no ar |
-| GET | `/clientes` | Lista todos os clientes (ordem alfabética) |
+| GET | `/clientes` | Lista os clientes em ordem alfabética, **paginado** |
+| GET | `/clientes?nome=ana` | Busca por parte do nome (sem diferenciar maiúsculas) |
 | GET | `/clientes/{id}` | Busca um cliente |
 | POST | `/clientes` | Cadastra um cliente → `201` |
 | PUT | `/clientes/{id}` | Atualiza um cliente |
 | DELETE | `/clientes/{id}` | Exclui um cliente → `204` |
+
+### Paginação e busca
+
+`GET /clientes` aceita três parâmetros opcionais:
+
+| Parâmetro | Padrão | O que faz |
+|---|---|---|
+| `nome` | — | Filtra por parte do nome: `ana` acha "Ana Souza" e "Mariana" |
+| `pagina` | `0` | Número da página (começa em 0) |
+| `tamanho` | `10` | Itens por página (máximo 100) |
+
+Exemplo: `GET /clientes?nome=ana&pagina=0&tamanho=5`
+
+```json
+{
+  "conteudo": [ { "id": 1, "nome": "Ana Souza", "...": "..." } ],
+  "pagina": 0,
+  "tamanho": 5,
+  "totalElementos": 7,
+  "totalPaginas": 2
+}
+```
 
 Exemplo de corpo para `POST`/`PUT`:
 
@@ -88,6 +111,19 @@ Todos os erros seguem o mesmo formato:
 - [x] Validações com `@Valid` (nome, e-mail, CPF)
 - [x] Tratamento de erros com `@ControllerAdvice`
 - [x] Documentação com Swagger
-- [ ] Paginação em `GET /clientes`
-- [ ] Busca por nome
-- [ ] Deploy (Docker)
+- [x] Paginação em `GET /clientes`
+- [x] Busca por nome
+- [x] Dockerfile (imagem em duas etapas)
+- [ ] Testar a imagem Docker e publicar (deploy)
+
+## Docker
+
+```bash
+docker build -t customer-api .
+docker run --rm --network host \
+  -e DB_URL=jdbc:postgresql://localhost:5432/clientes_db \
+  -e DB_USUARIO=clientes_app -e DB_SENHA=sua_senha \
+  customer-api
+```
+
+A API sobe em http://localhost:8080 (Swagger em `/swagger-ui.html`). `--network host` deixa o contêiner enxergar o PostgreSQL que já roda no seu PC.

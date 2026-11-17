@@ -5,10 +5,12 @@ import br.com.mello.customerapi.exception.ClienteNaoEncontradoException;
 import br.com.mello.customerapi.exception.DadoDuplicadoException;
 import br.com.mello.customerapi.model.Cliente;
 import br.com.mello.customerapi.repository.ClienteRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 /** Regras de negócio. O controller só conversa com o service, nunca direto com o banco. */
 @Service
@@ -21,8 +23,20 @@ public class ClienteService {
         this.repository = repository;
     }
 
-    public List<Cliente> listar() {
-        return repository.findAllByOrderByNomeAsc();
+    /** Tamanho máximo de página: evita alguém pedir 1 milhão de clientes de uma vez. */
+    static final int TAMANHO_MAXIMO = 100;
+
+    /**
+     * Lista em ordem alfabética, uma página por vez. Se vier um nome, filtra por ele
+     * (sem diferenciar maiúsculas; "ana" acha "Ana Souza" e "Mariana").
+     */
+    public Page<Cliente> listar(String nome, int pagina, int tamanho) {
+        Pageable pageable = PageRequest.of(Math.max(pagina, 0),
+                Math.min(Math.max(tamanho, 1), TAMANHO_MAXIMO), Sort.by("nome"));
+        if (nome == null || nome.isBlank()) {
+            return repository.findAll(pageable);
+        }
+        return repository.findByNomeContainingIgnoreCase(nome.trim(), pageable);
     }
 
     public Cliente buscar(Integer id) {

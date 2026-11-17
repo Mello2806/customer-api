@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -49,13 +51,30 @@ class ClienteControllerTest {
     }
 
     @Test
-    void deveListarClientesEmJson() throws Exception {
-        when(service.listar()).thenReturn(List.of(clienteComId(1, "Ana Souza"), clienteComId(2, "Bruno Lima")));
+    void deveListarClientesPaginadosEmJson() throws Exception {
+        when(service.listar(null, 0, 10)).thenReturn(new PageImpl<>(
+                List.of(clienteComId(1, "Ana Souza"), clienteComId(2, "Bruno Lima")), PageRequest.of(0, 10), 2));
 
         mockMvc.perform(get("/clientes"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].nome").value("Ana Souza"));
+                .andExpect(jsonPath("$.conteudo.length()").value(2))
+                .andExpect(jsonPath("$.conteudo[0].nome").value("Ana Souza"))
+                .andExpect(jsonPath("$.pagina").value(0))
+                .andExpect(jsonPath("$.totalElementos").value(2))
+                .andExpect(jsonPath("$.totalPaginas").value(1));
+    }
+
+    @Test
+    void devePassarNomePaginaETamanhoParaOService() throws Exception {
+        when(service.listar("ana", 2, 5)).thenReturn(new PageImpl<>(
+                List.of(clienteComId(11, "Mariana")), PageRequest.of(2, 5), 11));
+
+        mockMvc.perform(get("/clientes").param("nome", "ana").param("pagina", "2").param("tamanho", "5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.conteudo[0].nome").value("Mariana"))
+                .andExpect(jsonPath("$.pagina").value(2))
+                .andExpect(jsonPath("$.tamanho").value(5))
+                .andExpect(jsonPath("$.totalPaginas").value(3));
     }
 
     @Test
